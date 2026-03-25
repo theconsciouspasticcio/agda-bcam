@@ -79,7 +79,7 @@ module Product where
   -- These can be proven regardless of A
 
   ¬∃⇒∀¬ : ¬ (Σ A P) → Π A (¬∘ P)
-  ¬∃⇒∀¬ = {!!}
+  ¬∃⇒∀¬ f x px = f (x , px)
 
   ∃¬⇒¬∀ : Σ A (¬∘ P) → ¬ Π A P
   ∃¬⇒¬∀ = {!!}

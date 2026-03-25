@@ -2,6 +2,16 @@ module Tutorials.SetTheoryVsTypes where
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- FROM SET THEORY TO DEPENDENT TYPES
+<<<<<<< HEAD
+=======
+-- A 30-minute interactive tutorial for pure mathematicians
+--
+-- "If you have a BSc or MSc in mathematics, you already know
+--  everything in this file.  You just know it under different names."
+--
+-- Everything from scratch.  No imports, no libraries.
+-- Each definition builds on the last; the machine checks every step.
+>>>>>>> 1579ba92481ab873e24afa1f69c23680a8fffbc8
 --
 -- References:
 --   Thorsten Altenkirch — "Naive Type Theory" (2019)
@@ -21,39 +31,51 @@ module Tutorials.SetTheoryVsTypes where
 -- §1  JUDGMENT vs PROPOSITION  (Altenkirch, 2019)
 -- ─────────────────────────────────────────────────
 
+-- You already use types informally.  When you write "let n ∈ ℕ" on the
+-- blackboard, you are making a typing judgment.  Type theory just takes
+-- this seriously.  (Altenkirch calls this "naive type theory" — the
+-- natural analogue of naive set theory.)
+--
 -- In ZFC, "x ∈ A" is a PROPOSITION — a statement inside the system.
 -- It can be true or false.  You prove or disprove it.
 --
---   3 ∈ ℕ     (true)
---   3 ∈ ℤ     (true)
---   3 ∈ ℝ     (true)
---   π ∈ ℚ     (false, and this is a theorem)
+--   3 ∈ ℕ  (true)     π ∈ ℚ  (false — and this is a theorem)
 --
 -- An element can belong to many sets.  ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ.
 -- "Is the monster group a real number?" is a grammatically valid
 -- question in ZFC.  (The answer is no, but you need a proof.)
---
+
 -- In type theory, "x : A" is a JUDGMENT — a statement ABOUT the system.
--- It is not something you prove.  It is static, unchallengeable
--- information, like the declaration of a variable's type in algebra.
+-- It is not proved.  It is unchallengeable, like declaring a variable.
 --
 --   3 : ℕ
 --
--- Full stop.  3 does not simultaneously have type ℤ.
--- If you want an integer 3, that is a DIFFERENT term, built differently.
--- "Is the monster group a real number?" is not even a well-formed
--- question — it is a type error, caught before any mathematics begins.
+-- Full stop.  This 3 does not simultaneously have type ℤ.
+-- In set theory, 3 is one object living in many sets.  In type theory,
+-- there are many 3s — one per type:
 --
--- This is the deepest shift:
+--   3 : ℕ       (built from suc (suc (suc zero)))
+--   3 : ℤ       (built from +3, a signed integer)
+--   3 : Fin 7   (built as the fourth element of a 7-element type)
+--
+-- A mathematician sees "the same number."  The type checker sees three
+-- distinct terms that happen to print the same way.  To move between
+-- them you need an explicit coercion — a function ℕ → ℤ that maps
+-- a natural number to the corresponding positive integer.  You already
+-- know this map; you just never had to write it down.
+-- In a textbook, "3 ∈ ℤ" is free.  In Agda, you write "pos 3 : ℤ"
+-- to apply the embedding.  (The standard library abbreviates pos to
+-- a prefix "+", so you see "+ 3 : ℤ" — not to be confused with
+-- addition, which is infix: "3 + 5".  Agda tells them apart by arity.)
+--
+-- "Is the monster group a real number?" is a type error, caught before
+-- any mathematics begins.
+--
 --   set theory = one universe, membership is internal
 --   type theory = many types, typing is external
 
 -- A type is defined by its CONSTRUCTORS — the ways to build elements.
---
--- READING AGDA SYNTAX:
--- "data" lists constructors — the ONLY ways to build elements (an inductive defn).
--- "Set" = the type of types (a universe).  "ℕ : Set" means "ℕ is a type."
--- "→" = function arrow.  "A → B" = functions from A to B.
+-- "data" = inductive defn.  "Set" = the universe of types.  "→" = function arrow.
 
 data ℕ : Set where
   zero : ℕ                 -- 0
@@ -73,7 +95,7 @@ record ⊤ : Set where
 
 
 -- ─────────────────────────────────────────────────
--- §2  PROPOSITIONS AS TYPES  (Curry 1934, Howard 1969)
+-- §2  PROPOSITIONS AS TYPES  (Curry, 1934; Howard, 1969)
 -- ─────────────────────────────────────────────────
 
 -- So types replace sets.  But what replaces proofs?
@@ -132,22 +154,23 @@ data _⊎_ (A B : Set) : Set where
 -- not "absurd ℕ x".  Think: universally quantified but never written down.
 --
 -- Since ⊥ has NO constructors, there are ZERO cases to handle.
--- "()" tells Agda "this case is impossible" — the proof is vacuously complete.
+-- "()" tells Agda "this case is impossible."
 absurd : {A : Set} → ⊥ → A
 absurd ()
 
 -- P ∧ Q ⟹ Q ∧ P: swap the pair.
--- Pattern matching "(a , b)" on the left of "=" decomposes the input.
 ×-comm : {A B : Set} → A × B → B × A
 ×-comm (a , b) = b , a
 
 -- P ∨ Q ⟹ Q ∨ P: swap the tag.
--- Exhaustive case analysis — one clause per constructor, like "proof by cases."
 ⊎-comm : {A B : Set} → A ⊎ B → B ⊎ A
 ⊎-comm (inl a) = inr a
 ⊎-comm (inr b) = inl b
 
--- These are not just proofs — they are programs you can run on data.
+-- Read ×-comm again: it takes a pair and returns a swapped pair.
+-- It is simultaneously a proof that conjunction commutes AND a
+-- program that swaps two values in memory.  In type theory, every
+-- proof is a program you can execute.  This is not a metaphor.
 
 
 -- ┌─────────────────────────────────────────────────────────┐
@@ -160,7 +183,7 @@ absurd ()
 -- ─────────────────────────────────────────────────
 
 -- Andrej Bauer describes five stages of accepting constructive math,
--- parallel to the stages of grief.  The crux:
+-- parallel to the stages of grief.
 --
 -- In classical math you routinely prove ∃x.P(x) by:
 --   "Suppose no such x exists.  Then ... contradiction.  ∴ ∃x.P(x)."
@@ -168,7 +191,7 @@ absurd ()
 --
 -- In type theory, a proof of "there exists x in A such that P(x)"
 -- IS a pair:  (x , evidence-that-P-holds-for-x).
--- You MUST hand over the witness.  No exceptions.
+-- You MUST hand over the witness.
 --
 -- You are not "giving up" classical mathematics.  You are visiting a
 -- world where every existence proof comes with a construction.
@@ -197,11 +220,10 @@ Even (suc (suc n)) = Even n
 there-exists-an-even : Σ ℕ Even
 there-exists-an-even = 4 ,, tt    -- witness: 4.  evidence: Even 4 reduces to ⊤.
 
--- DOUBLE NEGATION: the boundary of constructivism.
--- A → ¬¬A is always provable.  But ¬¬A → A is not.
+-- DOUBLE NEGATION: A → ¬¬A is always provable.  But ¬¬A → A is not.
 -- Recall ¬A = A → ⊥, so ¬¬A = (A → ⊥) → ⊥.
--- A proof of ¬¬A knows that denying A leads to absurdity — but it
--- never hands you an actual witness of A.
+-- A proof of ¬¬A knows that denying A leads to absurdity — but
+-- never hands you an actual witness.
 to-¬¬ : {A : Set} → A → ¬ ¬ A
 to-¬¬ a f = f a     -- Given a : A and f : A → ⊥, we apply f to a to get ⊥.
 
@@ -209,7 +231,7 @@ to-¬¬ a f = f a     -- Given a : A and f : A → ⊥, we apply f to a to get �
 --   from-¬¬ : {A : Set} → ¬ ¬ A → A
 --   from-¬¬ f = ?   -- f : (A → ⊥) → ⊥.  No way to extract an A.
 
--- Three of the four quantifier De Morgan laws are constructive.  The fourth is not.
+-- Three of four De Morgan laws for quantifiers are constructive.
 
 ¬∃⇒∀¬ : {A : Set} {P : A → Set} → ¬ Σ A P → (x : A) → ¬ P x
 ¬∃⇒∀¬ f x px = f (x ,, px)
@@ -228,21 +250,48 @@ postulate
   classical-escape : {A : Set} {P : A → Set}
     → ¬ ((x : A) → P x) → Σ A (λ x → ¬ P x)
 
--- NOTE (Escardó): type theory is not anti-classical — it is pre-classical.
+-- Escardó's point: type theory is not anti-classical — it is pre-classical.
 -- LEM and choice are CONSISTENT; you just lose computation (proofs using
 -- LEM don't reduce to normal forms).  You can always postulate them.
+
+-- But sometimes you CAN decide.  "Dec A" means: either I have a proof
+-- of A, or I have a proof of ¬A — and I know WHICH.  Unlike LEM, which
+-- asserts one holds, Dec is an algorithm that computes the answer.
+
+data Dec (A : Set) : Set where
+  yes :   A → Dec A
+  no  : ¬ A → Dec A
+
+-- For natural numbers, equality IS decidable — compare digit by digit.
+-- For real numbers, it is NOT.  Consider (Buzzard's example):
+--
+--   Σ(1+14n+76n²+168n³)/2^(20n) · C(2n,n)^7  =?  32/π³
+--
+-- This is the Gourevitch conjecture.  It is open.  No algorithm can
+-- decide all such equalities over ℝ — this is a theorem.
+-- For decidable propositions, you get LEM for free.
+-- For undecidable ones, you simply do not.
+
 
 -- ─────────────────────────────────────────────────
 -- §4  EQUALITY: two notions where you had one
 -- ─────────────────────────────────────────────────
 
 -- Existence required a witness.  Equality has a similar surprise.
--- In set theory, a = b.  One notion.
--- In type theory, TWO:
---   (1) DEFINITIONAL — the machine checks by computation.  Free.
---   (2) PROPOSITIONAL — a type you inhabit with a proof.  May cost work.
--- Why two?  Because definitions have a computational direction:
--- _+_ recurses on its FIRST argument, so (0 + n) reduces but (n + 0) does not.
+--
+-- In set theory, a = b.  One notion.  In type theory, two:
+--
+-- DEFINITIONAL: the machine verifies it by unfolding definitions —
+--   like simplifying (x+1)(x−1) to x²−1 by mechanical expansion.
+--
+-- PROPOSITIONAL: you must construct a proof.
+--   The machine cannot see it by unfolding — you must explain why.
+--
+-- Which equalities are definitional depends on how you WROTE the
+-- definition.  Think of a group presentation: the relations you listed
+-- are "free," but their consequences need derivation.  Choosing a
+-- definition in type theory is like choosing a presentation — different
+-- choices make different facts trivially available.
 
 infix 4 _≡_
 -- The identity type.  One constructor: refl proves x ≡ x.
@@ -257,12 +306,12 @@ _+_ : ℕ → ℕ → ℕ
 zero  + m = m
 suc n + m = suc (n + m)
 
--- 2 + 2 computes to 4, so refl suffices.
+-- DEFINITIONAL in action: 2 + 2 unfolds to suc (suc (suc (suc zero))).
+-- refl suffices.
 2+2≡4 : 2 + 2 ≡ 4
 2+2≡4 = refl
 
--- Postulate ⊥ and the system collapses — like an inconsistent axiom set.
--- "module" creates a local scope (sandbox).
+-- Postulate ⊥ and the system collapses.  "module" creates a sandbox.
 
 module Danger where
   postulate oops : ⊥              -- assert that falsehood holds
@@ -275,22 +324,32 @@ module Danger where
 
 -- Outside the module, oops is gone.  --safe forbids postulates entirely.
 
--- 0 + n reduces to n by definition.
+-- DEFINITIONAL: 0 + n unfolds to n by the first clause of _+_.  Free.
 +-idˡ : (n : ℕ) → 0 + n ≡ n
 +-idˡ _ = refl
 
--- But n + 0 does NOT reduce — n is a variable, so _+_ is stuck.  We need induction.
+-- PROPOSITIONAL: n + 0 does NOT unfold — _+_ pattern-matches on the
+-- first argument, and n is a variable, so the definition is stuck.
+-- We must prove it by induction.  This is the "consequence that needs
+-- derivation" from our group presentation analogy.
 
--- Congruence (Leibniz): matching on refl unifies x with y, making the goal trivial.
+-- Tool: if x ≡ y then f x ≡ f y (apply any function to both sides).
 cong : {A B : Set} {x y : A} (f : A → B) → x ≡ y → f x ≡ f y
 cong f refl = refl
 
 +-idʳ : (n : ℕ) → n + 0 ≡ n
-+-idʳ zero    = refl
-+-idʳ (suc n) = cong suc (+-idʳ n)  -- recursive call = induction hypothesis
++-idʳ zero    = refl                 -- base: 0 + 0 unfolds to 0.  Definitional.
++-idʳ (suc n) = cong suc (+-idʳ n)  -- step: use the induction hypothesis.
 
--- ▸ KEY INSIGHT:  0 + n = n is free (computation).  n + 0 = n costs induction.
--- In a textbook both are equally trivial.  Definitions have a direction.
+-- ▸ Both are equally trivial in a textbook.  Here, one is a "relation in
+-- the presentation" (free) and the other is a "derived consequence" (costs
+-- a proof).  Had we defined _+_ by recursion on the SECOND argument,
+-- the roles would reverse.  The math is the same; the presentation differs.
+--
+-- ▸ Buzzard hit this formalizing sheaf pushforward: id(U) and U are only
+-- propositionally equal, but his proof silently assumed they were
+-- definitionally equal.  His conclusion: "I was wrong to use equality."
+-- (See "Grothendieck's use of equality," Buzzard 2024.)
 
 
 -- ┌─────────────────────────────────────────────────────────┐
@@ -305,15 +364,16 @@ cong f refl = refl
 -- We just used induction to prove n + 0 ≡ n.  But where was the axiom?
 -- In PA, induction is an AXIOM SCHEMA.
 -- In type theory, induction IS structural recursion — the termination
--- checker replaces "well-founded induction."  No axiom needed.
+-- checker verifies it.
 
--- Symmetry and transitivity: matching on refl unifies both sides.
+-- Symmetry and transitivity of ≡.
 sym : {A : Set} {x y : A} → x ≡ y → y ≡ x
 sym refl = refl
 
 trans : {A : Set} {x y z : A} → x ≡ y → y ≡ z → x ≡ z
 trans refl q = q
 
+-- A lemma we need for commutativity: addition and successor commute.
 +-suc : (n m : ℕ) → n + suc m ≡ suc (n + m)
 +-suc zero    m = refl
 +-suc (suc n) m = cong suc (+-suc n m)
@@ -325,7 +385,6 @@ trans refl q = q
 
 -- Equational reasoning: syntactic sugar for chains of "trans".
 -- Usage:  x ≡⟨ reason₁ ⟩  y ≡⟨ reason₂ ⟩  z ∎
--- You do not need to understand the definitions — just the pattern.
 infix  3 _∎
 infixr 2 step-≡
 infix  1 begin_
@@ -338,10 +397,14 @@ step-≡ _ yz xy = trans xy yz
 
 syntax step-≡ x yz xy = x ≡⟨ xy ⟩ yz
 
+-- Close the chain: "x ∎" means "x ≡ x by refl."
 _∎ : {A : Set} (x : A) → x ≡ x
 _ ∎ = refl
 
--- Same proof as +-comm, in blackboard style.
+-- Same proof, in equational reasoning style.  Read it aloud:
+-- "n + suc m equals suc (n + m) by +-suc, equals suc (m + n) by IH."
+-- It reads like a calculation on a blackboard — because it is one.
+-- The machine just checks each step.
 +-comm′ : (n m : ℕ) → n + m ≡ m + n
 +-comm′ n zero = +-idʳ n
 +-comm′ n (suc m) = begin
@@ -365,6 +428,7 @@ data Fin : ℕ → Set where
   zero : {n : ℕ} → Fin (suc n)     -- zero is in Fin 1, Fin 2, Fin 3, ...
   suc  : {n : ℕ} → Fin n → Fin (suc n)  -- if i is in Fin n, then suc i is in Fin (n+1)
 
+-- Immediate payoff: Fin 0 is empty — no constructor can target it.
 Fin0-empty : Fin 0 → ⊥
 Fin0-empty ()
 
@@ -375,8 +439,8 @@ data Vec (A : Set) : ℕ → Set where
 
 infixr 5 _∷_
 
--- Concatenation.  In a textbook, "|xs ++ ys| = |xs| + |ys|" is a separate
--- lemma.  Here the type signature IS the lemma, and the definition IS the proof.
+-- Concatenation.  In a textbook, |xs ++ ys| = |xs| + |ys| is a separate
+-- lemma.  Here the type IS the lemma and the definition IS the proof.
 _++_ : {A : Set} {n m : ℕ} → Vec A n → Vec A m → Vec A (n + m)
 []       ++ ys = ys
 (x ∷ xs) ++ ys = x ∷ (xs ++ ys)
@@ -385,27 +449,29 @@ _++_ : {A : Set} {n m : ℕ} → Vec A n → Vec A m → Vec A (n + m)
 lookup : {A : Set} {n : ℕ} → Vec A n → Fin n → A
 lookup (x ∷ _)  zero    = x
 lookup (_ ∷ xs) (suc i) = lookup xs i
--- No [] case: the index would need type Fin 0, which is empty.
+-- No [] case.  We did not handle it and forget — we CANNOT write it.
+-- The index would need type Fin 0, which has no constructors.
+-- The impossible case is not suppressed; it does not exist.
 
 -- McBride: "pay-as-you-go correctness" — encode more in the type,
--- the machine checks more.  One more example of specifications-as-types:
+-- the machine checks more.
 
 half : (n : ℕ) → Even n → ℕ
 half zero          _  = 0
 half (suc (suc n)) ev = suc (half n ev)
--- No case for n = 1: Even 1 = ⊥, so the call can never be made.
+-- Same trick: no case for n = 1.  Even 1 = ⊥, so the caller
+-- cannot construct the second argument.  The case is unwritable.
 
 
 -- ─────────────────────────────────────────────────
 -- §7  A TASTE OF REAL ALGEBRA
 -- ─────────────────────────────────────────────────
 
--- We have all the ingredients.  Types encode data (ℕ, Vec, Fin).
--- Types encode propositions (_≡_, Even).  Types encode specifications
--- (Vec n guarantees length, Even n guards half).  Now let us put
--- it all together: a group, with the same axioms as any algebra
--- textbook, but machine-checked.  Since propositions are types,
--- operations and axioms live together in one record.  "∀ x" = "(x : G) →".
+-- Now put it together: a group, same axioms as any algebra textbook,
+-- but machine-checked.  Since propositions are types, operations and
+-- axioms live side by side in one record — there is no separate
+-- "definition" and "axiom list."  They are the same kind of thing.
+-- "∀ x" = "(x : G) →".
 
 record Group (G : Set) : Set where
   field
@@ -523,3 +589,27 @@ record Group (G : Set) : Set where
 --     https://agda.readthedocs.io/en/latest/getting-started/tutorial-list.html
 --   The Agda standard library
 --     https://agda.github.io/agda-stdlib/
+
+-- Pedagogy & classroom evidence:
+--   Kevin Buzzard, "Mathematics in Type Theory" (Xena Project, 2020)
+--     https://xenaproject.wordpress.com/2020/06/20/mathematics-in-type-theory/
+--   Kevin Buzzard, "Formalising Mathematics" course notes (Imperial, 2024)
+--     https://www.ma.imperial.ac.uk/~buzzard/xena/formalising-mathematics-2024/formalisingmathematics.pdf
+--   Bottoni, Cattaneo, Sacikara, "Teaching Foundations of Math with Lean" (2025)
+--     https://arxiv.org/abs/2501.03352
+--   Juhosova, Zaidman, Cockx, "Pinpointing Learning Obstacles of an ITP" (ICPC, 2025)
+--     https://sarajuhosova.com/assets/files/2025-icpc.pdf
+--   Iannone & Thoma, "It Feels Like Cheating" (2025)
+--     https://link.springer.com/article/10.1007/s40751-025-00193-w
+--   Avigad, "Learning Logic and Proof with an ITP"
+--     https://www.andrew.cmu.edu/user/avigad/Papers/learning_logic_and_proof.pdf
+--   Kevin Buzzard, "Equality part 1: definitional equality" (Xena, 2019)
+--     https://xenaproject.wordpress.com/2019/05/21/equality-part-1-definitional-equality/
+--   Kevin Buzzard, "Equality, specifications, and implementations" (Xena, 2020)
+--     https://xenaproject.wordpress.com/2020/07/03/equality-specifications-and-implementations/
+--   Kevin Buzzard, "Grothendieck's use of equality" (2024)
+--     https://arxiv.org/abs/2405.10387
+--   Kevin Buzzard, guest post on Mathematics Without Apologies (2018)
+--     https://mathematicswithoutapologies.wordpress.com/2018/09/11/guest-post-by-kevin-buzzard/
+--   Kevin Buzzard, decidability of real equality (Mastodon, 2023)
+--     https://mathstodon.xyz/@xenaproject/109958579175843725
