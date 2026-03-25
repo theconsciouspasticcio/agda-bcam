@@ -95,7 +95,7 @@ module Simple where
   -- The first line below gives the type of the function get-fst
   -- The second line gives its definition
   get-fst : {A : Set} {B : Set} → A × B → A
-  get-fst x = {!!}
+  get-fst (fst₁ , snd₁) = fst₁
 
   -- Agda is an *interactive* proof assistant
   -- We don't provide our proofs/programs all at once: we develop them iteratively
@@ -111,7 +111,7 @@ module Simple where
   -- ctrl+c ctrl+a     try to automatically fulfill the goal
   -- key bindings: https://agda.readthedocs.io/en/v2.6.1.3/getting-started/quick-guide.html
   get-snd : ∀ {A B} → A × B → B
-  get-snd x = {!!}
+  get-snd (fst₁ , snd₁) = snd₁
 
   -- The variable keyword enables us to declare convention for notation
   -- Unless said otherwise, whenever we refer to A, B or C and these are not bound, we will refer to objects of type Set
@@ -120,29 +120,35 @@ module Simple where
     A B C : Set ℓ
 
   -- Notice how we don't have to declare A, B and C anymore
-  curry : (A → B → C) → (A × B → C)
-  curry f = {!!}
+  curry : (A → (B → C)) → (A × B → C)
+  curry f (a , b) = f a b
 
-  uncurry : (A × B → C) → (A → B → C)
-  uncurry f = {!!}
+  uncurry : (A × B → C) → (A → (B → C))
+  uncurry f a b = f (a , b)
 
   ×-comm : A × B → B × A
-  ×-comm = {!!}
+  ×-comm (fst₁ , snd₁) = snd₁ , fst₁
 
   ×-assoc : (A × B) × C → A × (B × C)
-  ×-assoc = {!!}
+  ×-assoc ((fst₁ , snd₂) , snd₁) = fst₁ , (snd₂ , snd₁)
 
   -- Pattern matching has to be exhaustive: all cases must be addressed
   ⊎-comm : A ⊎ B → B ⊎ A
-  ⊎-comm = {!!}
+  ⊎-comm (inl x) = inr x
+  ⊎-comm (inr x) = inl x
 
+
+  --  inl : (A ⊎ B) → (A ⊎ B) ⊎ C
+  --           
   ⊎-assoc : (A ⊎ B) ⊎ C → A ⊎ (B ⊎ C)
-  ⊎-assoc = {!!}
+  ⊎-assoc (inl (inl x)) = inl x
+  ⊎-assoc (inl (inr x)) = inr (inl x)
+  ⊎-assoc (inr x) = inr (inr x)
 
   -- If there are no cases to be addressed there is nothing for us left to do
   -- If you believe ⊥ exist you believe anything
   absurd : ⊥ → A
-  absurd a = {!!}
+  absurd ()
 
   -- In constructive mathematics all proofs are constructions
   -- How do we show that an object of type A cannot possibly be constructed, while using a construction to show so?
@@ -154,24 +160,26 @@ module Simple where
   -- That is however not the case in constructive mathematics:
   -- The proof ¬ ¬ A is a function that takes (A → ⊥) into ⊥, and offers no witness for A
   -- The opposite direction is however constructive:
-  ⇒¬¬ : A → ¬ ¬ A
-  ⇒¬¬ = {!!}
+  ⇒¬¬ : A → ((A → ⊥) → ⊥)
+  ⇒¬¬ a f = f a
 
   -- Moreover, double negation can be eliminated from non-witnesses
   ¬¬¬⇒¬ : ¬ ¬ ¬ A → ¬ A
-  ¬¬¬⇒¬ = {!!}
+  --  (((A → ⊥) → ⊥) -f→ ⊥ ) -> (A → ⊥)
+  ¬¬¬⇒¬ f a = f(⇒¬¬ a) 
 
   -- Here we have a choice of two programs to write
   ×-⇒-⊎₁ : A × B → A ⊎ B
-  ×-⇒-⊎₁ = {!!}
+  ×-⇒-⊎₁  x = inl(fst x)
 
   ×-⇒-⊎₂ : A × B → A ⊎ B
-  ×-⇒-⊎₂ = {!!}
+  ×-⇒-⊎₂ x = inr(snd x)
 
   -- A little more involved
   -- Show that the implication (A ⊎ B → A × B) is not always true for all A and Bs
   ⊎-⇏-× : ¬ (∀ {A B} → A ⊎ B → A × B)
-  ⊎-⇏-× f = {!!}
+  ⊎-⇏-× f = snd(f {A = ⊤} {B = ⊥} (inl tt)) 
+
 
 variable
   ℓ : Level

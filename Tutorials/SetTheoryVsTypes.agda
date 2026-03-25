@@ -2,13 +2,6 @@ module Tutorials.SetTheoryVsTypes where
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- FROM SET THEORY TO DEPENDENT TYPES
--- A 30-minute interactive tutorial for pure mathematicians
---
--- "If you have a BSc or MSc in mathematics, you already know
---  everything in this file.  You just know it under different names."
---
--- Style: everything from scratch.  No imports, no libraries.
--- Each definition builds on the last.  The machine checks every step.
 --
 -- References:
 --   Thorsten Altenkirch — "Naive Type Theory" (2019)
@@ -16,13 +9,11 @@ module Tutorials.SetTheoryVsTypes where
 --   Andrej Bauer — "Five Stages of Accepting Constructive Mathematics"
 --   Martín Escardó — "Introduction to Univalent Foundations" (2019)
 --   Conor McBride — "Why Dependent Types Matter" (2006)
---
--- PRESENTER: see stt-present.el for keybindings (F1–F12).
 -- ═══════════════════════════════════════════════════════════════════════
 
 
 -- ┌─────────────────────────────────────────────────────────┐
--- │  ACT I.   THE GROUND RULES                              │
+-- │      I.   THE GROUND RULES                              │
 -- │  What changes when you move from ZFC to type theory     │
 -- └─────────────────────────────────────────────────────────┘
 
@@ -440,10 +431,10 @@ record Group (G : Set) : Set where
   -- (x⁻¹)⁻¹ = x.
   inv-inv : ∀ x → (x ⁻¹) ⁻¹ ≡ x
   inv-inv x = begin
-    (x ⁻¹) ⁻¹                        ≡⟨ sym (idʳ _) ⟩
-    ((x ⁻¹) ⁻¹) · ε                  ≡⟨ cong (λ e → ((x ⁻¹) ⁻¹) · e) (sym (invˡ x)) ⟩
-    ((x ⁻¹) ⁻¹) · ((x ⁻¹) · x)      ≡⟨ sym (assoc _ _ _) ⟩
-    (((x ⁻¹) ⁻¹) · (x ⁻¹)) · x      ≡⟨ cong (λ e → e · x) (invˡ (x ⁻¹)) ⟩
+    (x ⁻¹) ⁻¹                         ≡⟨ sym (idʳ _) ⟩
+    ((x ⁻¹) ⁻¹) · ε                   ≡⟨ cong (λ e → ((x ⁻¹) ⁻¹) · e) (sym (invˡ x)) ⟩
+    ((x ⁻¹) ⁻¹) · ((x ⁻¹) · x)        ≡⟨ sym (assoc _ _ _) ⟩
+    (((x ⁻¹) ⁻¹) · (x ⁻¹)) · x        ≡⟨ cong (λ e → e · x) (invˡ (x ⁻¹)) ⟩
     ε · x                             ≡⟨ idˡ x ⟩
     x                                 ∎
 
@@ -460,9 +451,9 @@ record Group (G : Set) : Set where
 -- │ A ⊂ B                    │ no subtyping; use Σ or indexed type     │
 -- │ f ⊂ A × B  (graph)       │ f : A → B  (primitive, computes)        │
 -- │ a = b  (one equality)    │ definitional (free) + propositional     │
--- │ {x ∈ A | P(x)}          │ Σ A P  or  an indexed data type         │
--- │ ∀x ∈ A. P(x)            │ (x : A) → P x  (dependent function)    │
--- │ ∃x ∈ A. P(x)            │ Σ A P  (witness + evidence)             │
+-- │ {x ∈ A | P(x)}           │ Σ A P  or  an indexed data type         │
+-- │ ∀x ∈ A. P(x)             │ (x : A) → P x  (dependent function)     │
+-- │ ∃x ∈ A. P(x)             │ Σ A P  (witness + evidence)             │
 -- │ proof by contradiction   │ only proves ¬A, not A                   │
 -- │ induction axiom          │ structural recursion (+ termination)    │
 -- │ proposition              │ type                                    │
