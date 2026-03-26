@@ -2,17 +2,6 @@ module Tutorials.SetTheoryVsTypes where
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- FROM SET THEORY TO DEPENDENT TYPES
-<<<<<<< HEAD
-=======
--- A 30-minute interactive tutorial for pure mathematicians
---
--- "If you have a BSc or MSc in mathematics, you already know
---  everything in this file.  You just know it under different names."
---
--- Everything from scratch.  No imports, no libraries.
--- Each definition builds on the last; the machine checks every step.
->>>>>>> 1579ba92481ab873e24afa1f69c23680a8fffbc8
---
 -- References:
 --   Thorsten Altenkirch — "Naive Type Theory" (2019)
 --   Philip Wadler — "Propositions as Types" (2015)
@@ -94,9 +83,9 @@ record ⊤ : Set where
   constructor tt
 
 
--- ─────────────────────────────────────────────────
+-- ──────────────────────────────────────────────────────
 -- §2  PROPOSITIONS AS TYPES  (Curry, 1934; Howard, 1969)
--- ─────────────────────────────────────────────────
+-- ──────────────────────────────────────────────────────
 
 -- So types replace sets.  But what replaces proofs?
 
@@ -475,17 +464,18 @@ half (suc (suc n)) ev = suc (half n ev)
 
 record Group (G : Set) : Set where
   field
-    ε     : G                                           -- identity element
+    ε     : G                                          -- identity element
     _·_   : G → G → G                                  -- group operation
     _⁻¹   : G → G                                      -- inverse
-    assoc : ∀ x y z → (x · y) · z ≡ x · (y · z)       -- associativity
-    idˡ   : ∀ x → ε · x ≡ x                           -- left identity
-    idʳ   : ∀ x → x · ε ≡ x                           -- right identity
-    invˡ  : ∀ x → (x ⁻¹) · x ≡ ε                     -- left inverse
-    invʳ  : ∀ x → x · (x ⁻¹) ≡ ε                     -- right inverse
+    assoc : ∀ x y z → (x · y) · z ≡ x · (y · z)        -- associativity
+    idˡ   : ∀ x → ε · x ≡ x                            -- left identity
+    idʳ   : ∀ x → x · ε ≡ x                            -- right identity
+    invˡ  : ∀ x → (x ⁻¹) · x ≡ ε                       -- left inverse
+    invʳ  : ∀ x → x · (x ⁻¹) ≡ ε                       -- right inverse
 
   infixl 7 _·_
   infix  8 _⁻¹
+
 
   -- The identity is unique.
   id-unique : ∀ e → (∀ x → e · x ≡ x) → e ≡ ε
