@@ -1,7 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
 module Tutorials.SetTheoryVsTypes-Live where
-
 open import Agda.Primitive using (Level)
 
 -- FROM SET THEORY TO DEPENDENT TYPES
@@ -12,32 +11,19 @@ open import Agda.Primitive using (Level)
 --   Martín Escardó — "Introduction to Univalent Foundations" (2019)
 --   Conor McBride — "Why Dependent Types Matter" (2006)
 
--- §1  JUDGMENT vs PROPOSITION  (Altenkirch, 2019)
--- ─────────────────────────────────────────────────
+-- §1  JUDGMENT vs PROPOSITION  
+-- ────────────────────────────
 
 -- In set theory, `x ∈ A` is a proposition.
 -- It is a statement that may be true or false.
 --
--- In type theory, `x : A` is a judgment.
--- It is part of the context: it says that `x` is an element of `A`.
---
--- So set theory talks about membership inside the theory,
--- while type theory keeps track of types from the outside.
---
+-- In type theory, `x : A` is a judgment. It is already a proof!
+--                    ↑ 
+--              `x has type A`  
+
 --   set theory = one universe, membership is internal
---   type theory = many types, typing is external
+--   type theory = many types (universes), typing is external
 
--- `Set` means "type".
--- `data` introduces a type by listing its constructors.
-
-data ℕ : Set where
-  zero : ℕ
-  suc  : ℕ → ℕ
-
-{-# BUILTIN NATURAL ℕ #-}  -- lets us write numerals
-
-variable
-  n m l : ℕ
 
 -- `⊥` has no constructors, so nothing can inhabit it.
 data ⊥ : Set where
@@ -47,9 +33,8 @@ record ⊤ : Set where
   constructor tt
 
 
--- §2  PROPOSITIONS AS TYPES  (Curry, 1934; Howard, 1969)
--- ─────────────────────────────────────────────────
-
+-- §2  PROPOSITIONS AS TYPES:  0-th order LOGIC
+-- ───────────────────────────────────────────
 variable
   ℓ : Level
   A B C : Set ℓ
@@ -64,8 +49,6 @@ variable
 --   `P × Q`         means P and Q
 --   `P ⊎ Q`         means P or Q
 --   `P → Q`         means if P then Q
---   `(x : A) → P x` means for every `x : A`, `P x`
---   `Σ A P`         means there exists `x : A` such that `P x`
 --
 -- A value of `A × B` stores both an `A` AND a `B`.
 record _×_ (A B : Set ℓ) : Set ℓ where
@@ -84,12 +67,12 @@ data _⊎_ (A B : Set ℓ) : Set ℓ where
 ¬_ : Set ℓ → Set ℓ
 ¬ A = A → ⊥
 
--- EXERCISE 1: from `⊥`, build anything.
+-- EXERCISE: from `⊥`, build anything.
 -- There are no cases to handle, because `⊥` has no constructors.
 absurd : ⊥ → A
 absurd ()
 
--- EXERCISE 5: double-negation introduction.
+-- EXERCISE: double-negation introduction.
 to-¬¬ : A → ¬ ¬ A          -- (A →f ⊥) → ⊥
 to-¬¬ a f = f a
 
@@ -102,23 +85,150 @@ to-¬¬ a f = f a
 --    but never hands you an actual witness.
 -- ──────────────────────────────────────────────────────────
 
--- EXERCISE 2: from `A × B`, build `B × A`.
+-- EXERCISE: from `A × B`, build `B × A`.
 ×-comm : A × B → B × A
-×-comm = {!!}
+×-comm (a , b) = {! a!}
 
--- EXERCISE 3: from `A ⊎ B`, build `B ⊎ A`.
+-- EXERCISE: from `A ⊎ B`, build `B ⊎ A`.
 ⊎-comm : A ⊎ B → B ⊎ A
 ⊎-comm = {!!}
 
--- The same term can be read as a small program or as a proof.
+
+-- § NATURAL NUMBERS
+-- `data` introduces a type by listing its constructors.
+data ℕ : Set where
+  zero : ℕ
+  suc  : ℕ → ℕ
 
 
--- §3  EXISTENCE REQUIRES A WITNESS  (Bauer, 2016)
+three : ℕ
+three = suc (suc (suc zero))
+
+-- 3 ≠ 4
+-- {}
+
+{-# BUILTIN NATURAL ℕ #-}  -- lets us write numerals
+
+variable
+  n m l : ℕ
+
+
+--   `(x : A) → P x` means for all `x : A`, `P x`
+--   `Σ A P`         means there exists `x : A` such that `P x`
+
+-- §4  EQUALITY
 -- ─────────────────────────────────────────────────
+-- There are two equalities to keep apart.
 
--- `Σ A P` is a dependent pair.
--- It stores `x : A` together with evidence of `P x`.
--- This is how type theory expresses existence.
+-- DEFINITIONAL: equality is checked by computation.
+-- PROPOSITIONAL: equality is a type that we prove.
+
+-- Which equalities are definitional depends on the chosen definition.
+infix 4 _≡_
+-- `refl` works when both sides compute to the same term.
+data _≡_ {A : Set ℓ} (x : A) : A → Set ℓ where
+  refl : x ≡ x
+
+{-# BUILTIN EQUALITY _≡_ #-}
+
+
+-- EXAMPLE: the Definition of addition of naturals
+_+_ : ℕ → ℕ → ℕ
+zero  + m = m
+suc n + m = suc (n + m)
+
+-- Here addition recurses on the first argument.
+-- So `2 + 2` computes to `4`.
+2+2≡4 : 2 + 2 ≡ 4
+2+2≡4 = refl
+
+-- If we assume `⊥`, then `absurd` lets us prove anything.
+module LeDanger where
+  postulate nonsense : ⊥
+
+  1+1≡3 : 1 + 1 ≡ 3
+  1+1≡3 = absurd nonsense 
+
+  0≡1 : 0 ≡ 1
+  0≡1 = {!!}
+
+
+-- Because `_+_` recurses on the first argument,
+-- `0 + n` reduces by definition.
++-idˡ : (n : ℕ) → 0 + n ≡ n -- these are Propositionally equal but NOT Definitionally equal
++-idˡ n = refl
+
+
+variable
+ f : A → B 
+
+-- But `n + 0` does not reduce, so it needs a proof.
+
+-- to prove it we first need this new type:
+-- If `x ≡ y`, then `f x ≡ f y`.
+cong : (f : A → B) → x ≡ y → f x ≡ f y
+cong f refl = refl
+
+
+-- §5  INDUCTION IS RECURSION 
+-- EXERCISE: prove `n + 0 ≡ n` by induction on `n`.
++-idʳ : (n : ℕ) → n + 0 ≡ n
++-idʳ zero = refl
++-idʳ (suc n) = cong suc (+-idʳ n)  
+
+
+-- Basic operations on equality.
+sym : x ≡ y → y ≡ x
+sym refl = refl
+
+trans : x ≡ y → y ≡ z → x ≡ z
+trans refl q = q
+
+-- A lemma we need for commutativity: addition and successor commute.
++-suc : (n m : ℕ) → n + suc m ≡ suc (n + m)
++-suc zero    m = refl
++-suc (suc n) m = cong suc (+-suc n m)
+
+
+
+-- EQUATIONAL REASONING: sugar
+-- IGNORE ME: ────────────────────────────┐
+infix  3 _∎                               
+infixr 2 step-≡                            
+infix  1 begin_
+
+begin_ : x ≡ y → x ≡ y
+begin p = p
+
+step-≡ : (x : A) → y ≡ z → x ≡ y → x ≡ z
+step-≡ _ yz xy = trans xy yz
+
+syntax step-≡ x yz xy = x ≡⟨ xy ⟩ yz
+_∎ : (x : A) → x ≡ x
+_ ∎ = refl
+-- ───────────────────────────────────────┘
+-- Ty for ignoring...
+
+-- EXERCISE 11: the same proof in equational style.
++-comm : (n m : ℕ) → n + m ≡ m + n
++-comm n zero = +-idʳ n
++-comm n (suc m) = begin
+  n + suc m    ≡⟨ +-suc n m ⟩
+  suc (n + m)  ≡⟨ cong suc ( +-comm n m) ⟩
+  suc (m + n)  ∎
+
+
+-- ──────────────────────────────────────────────────────
+-- §6  DEPENDENT TYPES 1th-order LOGIC a.k.a. NORMAL MATH
+-- ──────────────────────────────────────────────────────
+--   `(x : A) → P x` means for all `x : A`, `P x`
+--   `Σ A P`         means there exists `x : A` such that `P x`
+
+-- §3  EXISTENCE REQUIRES A WITNESS 
+-- ─────────────────────────────────────────────────
+-- `Σ A P` is a dependent pair. 
+-- It stores `x : A` together with a proof of `P x`.
+
 record Σ (A : Set ℓ) (P : A → Set ℓ) : Set ℓ where
   constructor _,,_
   field
@@ -132,126 +242,16 @@ Even zero          = ⊤
 Even (suc zero)    = ⊥
 Even (suc (suc n)) = Even n
 
--- EXERCISE 4: give an even natural number together with evidence.
+-- EXERCISE: give an even natural number together with evidence.
 there-exists-an-even : Σ ℕ Even
 there-exists-an-even  = 2 ,, tt
 
 
--- §4  EQUALITY: two notions where you had one
--- ─────────────────────────────────────────────────
 
--- There are two equalities to keep apart.
--- Definitional equality is checked by computation.
--- Propositional equality is a type that we prove.
--- Which equalities are definitional depends on the chosen definition.
-
-infix 4 _≡_
--- `refl` works when both sides compute to the same term.
-data _≡_ {A : Set ℓ} (x : A) : A → Set ℓ where
-  refl : x ≡ x
-
-{-# BUILTIN EQUALITY _≡_ #-}
-
-_+_ : ℕ → ℕ → ℕ
-zero  + m = m
-suc n + m = suc (n + m)
-
--- Here addition recurses on the first argument.
--- So `2 + 2` computes to `4`.
-2+2≡4 : 2 + 2 ≡ 4
-2+2≡4 = refl
-
--- If we assume `⊥`, then `absurd` lets us prove anything.
-
-module LeDanger where
-  postulate nonsense : ⊥
-
-  1+1≡3 : 1 + 1 ≡ 3
-  1+1≡3 = absurd nonsense 
-
-  0≡1 : 0 ≡ 1
-  0≡1 = {!!}
-
--- Because `_+_` recurses on the first argument,
--- `0 + n` reduces by definition.
-+-idˡ : (n : ℕ) → 0 + n ≡ n
-+-idˡ _ = refl
-
-
-variable
- f : A → B 
-
--- But `n + 0` does not reduce, so it needs a proof.
--- we need this new type
--- If `x ≡ y`, then `f x ≡ f y`.
-cong : (f : A → B) → x ≡ y → f x ≡ f y
-cong f refl = refl
-
--- EXERCISE 8: prove `n + 0 ≡ n` by induction on `n`.
-+-idʳ : (n : ℕ) → n + 0 ≡ n
-+-idʳ zero = refl
-+-idʳ (suc n) = cong suc (+-idʳ n)  
-
--- §5  INDUCTION IS RECURSION  (no axiom needed)
--- ─────────────────────────────────────────────────
-
--- In Agda, induction is recursion on the shape of the data.
-
--- Basic operations on equality.
-sym : x ≡ y → y ≡ x
-sym refl = refl
-
-trans : x ≡ y → y ≡ z → x ≡ z
-trans refl q = q
-
--- EXERCISE 9: prove `n + suc m ≡ suc (n + m)`.
-+-suc : (n m : ℕ) → n + suc m ≡ suc (n + m)
-+-suc = {!!}
-
--- EXERCISE 10: prove commutativity of addition.
-+-comm : (n m : ℕ) → n + m ≡ m + n
-+-comm = {!!}
-
--- This notation lets us write calculations as chains of equalities.
-infix  3 _∎
-infixr 2 step-≡
-infix  1 begin_
-
-begin_ : x ≡ y → x ≡ y
-begin p = p
-
-step-≡ : (x : A) → y ≡ z → x ≡ y → x ≡ z
-step-≡ _ yz xy = trans xy yz
-
-syntax step-≡ x yz xy = x ≡⟨ xy ⟩ yz
-_∎ : (x : A) → x ≡ x
-_ ∎ = refl
-
--- EXERCISE 11: the same proof in equational style.
-+-comm′ : (n m : ℕ) → n + m ≡ m + n
-+-comm′ n zero = +-idʳ n
-+-comm′ n (suc m) = begin
-  n + suc m    ≡⟨ {!!} ⟩
-  suc (n + m)  ≡⟨ {!!} ⟩
-  suc (m + n)  ∎
 
 
 -- ─────────────────────────────────────────────────
--- §6  DEPENDENT TYPES REPLACE SET-BUILDER NOTATION
--- ─────────────────────────────────────────────────
-
--- Instead of subsets, we often use indexed types.
--- The index stores the invariant we care about.
-
--- `Fin n` is the type of numbers strictly below `n`.
-data Fin : ℕ → Set where
-  zero : Fin (suc n)
-  suc  : Fin n → Fin (suc n)
-
--- EXERCISE 12: `Fin 0` is empty.
-Fin0-empty : Fin 0 → ⊥
-Fin0-empty ()
-
+-- AGDA IS A FULLY FLEDGED (T. complete) PROGRAMMING LANGUAGE
 -- `Vec A n` is the type of lists of `A` of length `n`.
 data Vec (A : Set) : ℕ → Set where
   []  : Vec A 0
@@ -259,27 +259,14 @@ data Vec (A : Set) : ℕ → Set where
 
 infixr 5 _∷_
 
--- EXERCISE 13: concatenation.
+-- EXERCISE: concatenation.
 _++_ : Vec A n → Vec A m → Vec A (n + m)
 _++_ = {!!}
 
--- EXERCISE 14: safe indexing.
-lookup : Vec A n → Fin n → A
-lookup = {!!}
 
--- There is no out-of-bounds case:
--- if the vector has length `0`, then the index would have type `Fin 0`,
--- and that type has no inhabitants.
-
--- EXERCISE 15: verified halving.
-half : (n : ℕ) → Even n → ℕ
-half = {!!}
-
-
--- ─────────────────────────────────────────────────
--- §7  A TASTE OF REAL ALGEBRA
--- ─────────────────────────────────────────────────
-
+-- ────────────────────────────
+-- §7  A TASTE OF REAL MATH == ALGEBRA
+-- ────────────────────────────
 -- In type theory, a structure and its laws can live in one record.
 -- Here is the type of groups.
 
@@ -297,22 +284,12 @@ record Group (G : Set) : Set where
   infixl 7 _·_
   infix  8 _⁻¹
 
-  -- EXERCISE 16: the identity is unique.
+  -- EXERCISE: the identity is unique.
   id-unique : ∀ e → (∀ x → e · x ≡ x) → e ≡ ε
   id-unique e e-id = begin
-    e      ≡⟨ {!!} ⟩
-    e · ε  ≡⟨ {!!} ⟩
+    e      ≡⟨ sym (idʳ e) ⟩
+    e · ε  ≡⟨  e-id ε ⟩
     ε      ∎
-
-  -- EXERCISE 17: (x⁻¹)⁻¹ = x.
-  inv-inv : ∀ x → (x ⁻¹) ⁻¹ ≡ x
-  inv-inv x = begin
-    (x ⁻¹) ⁻¹                        ≡⟨ {!!} ⟩
-    ((x ⁻¹) ⁻¹) · ε                  ≡⟨ {!!} ⟩
-    ((x ⁻¹) ⁻¹) · ((x ⁻¹) · x)      ≡⟨ {!!} ⟩
-    (((x ⁻¹) ⁻¹) · (x ⁻¹)) · x      ≡⟨ {!!} ⟩
-    ε · x                             ≡⟨ {!!} ⟩
-    x                                 ∎
 
 -- ─────────────────────────────────────────────────
 -- RESOURCES
