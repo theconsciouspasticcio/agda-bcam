@@ -4,14 +4,8 @@ module Tutorials.SetTheoryVsTypes-Live where
 open import Agda.Primitive using (Level)
 
 -- FROM SET THEORY TO DEPENDENT TYPES
--- References:
---   Thorsten Altenkirch — "Naive Type Theory" (2019)
---   Philip Wadler — "Propositions as Types" (2015)
---   Andrej Bauer — "Five Stages of Accepting Constructive Mathematics"
---   Martín Escardó — "Introduction to Univalent Foundations" (2019)
---   Conor McBride — "Why Dependent Types Matter" (2006)
 
--- §1  JUDGMENT vs PROPOSITION  
+-- § JUDGMENT vs PROPOSITION  
 -- ────────────────────────────
 
 -- In set theory, `x ∈ A` is a proposition.
@@ -33,7 +27,7 @@ record ⊤ : Set where
   constructor tt
 
 
--- §2  PROPOSITIONS AS TYPES:  0-th order LOGIC
+-- § PROPOSITIONS AS TYPES:  0-th order LOGIC
 -- ───────────────────────────────────────────
 variable
   ℓ : Level
@@ -87,11 +81,12 @@ to-¬¬ a f = f a
 
 -- EXERCISE: from `A × B`, build `B × A`.
 ×-comm : A × B → B × A
-×-comm (a , b) = {! a!}
+×-comm (a , b) =  b , a
 
 -- EXERCISE: from `A ⊎ B`, build `B ⊎ A`.
 ⊎-comm : A ⊎ B → B ⊎ A
-⊎-comm = {!!}
+⊎-comm (inl x) = inr x
+⊎-comm (inr x) = inl x
 
 
 -- § NATURAL NUMBERS
@@ -104,10 +99,14 @@ data ℕ : Set where
 three : ℕ
 three = suc (suc (suc zero))
 
+
 -- 3 ≠ 4
 -- {}
 
+
+
 {-# BUILTIN NATURAL ℕ #-}  -- lets us write numerals
+
 
 variable
   n m l : ℕ
@@ -150,19 +149,20 @@ module LeDanger where
   1+1≡3 = absurd nonsense 
 
   0≡1 : 0 ≡ 1
-  0≡1 = {!!}
+  0≡1 = absurd nonsense
 
 
 -- Because `_+_` recurses on the first argument,
 -- `0 + n` reduces by definition.
-+-idˡ : (n : ℕ) → 0 + n ≡ n -- these are Propositionally equal but NOT Definitionally equal
++-idˡ : (n : ℕ) → 0 + n ≡ n 
 +-idˡ n = refl
 
 
 variable
  f : A → B 
 
--- But `n + 0` does not reduce, so it needs a proof.
+-- But `n + 0 = n` does not reduce, so it needs a proof.
+-- these are Propositionally equal but NOT Definitionally equal
 
 -- to prove it we first need this new type:
 -- If `x ≡ y`, then `f x ≡ f y`.
@@ -170,7 +170,7 @@ cong : (f : A → B) → x ≡ y → f x ≡ f y
 cong f refl = refl
 
 
--- §5  INDUCTION IS RECURSION 
+-- § INDUCTION IS RECURSION 
 -- EXERCISE: prove `n + 0 ≡ n` by induction on `n`.
 +-idʳ : (n : ℕ) → n + 0 ≡ n
 +-idʳ zero = refl
@@ -219,12 +219,12 @@ _ ∎ = refl
 
 
 -- ──────────────────────────────────────────────────────
--- §6  DEPENDENT TYPES 1th-order LOGIC a.k.a. NORMAL MATH
+-- § DEPENDENT TYPES 1th-order LOGIC a.k.a. NORMAL MATH
 -- ──────────────────────────────────────────────────────
 --   `(x : A) → P x` means for all `x : A`, `P x`
 --   `Σ A P`         means there exists `x : A` such that `P x`
 
--- §3  EXISTENCE REQUIRES A WITNESS 
+-- § EXISTENCE REQUIRES A WITNESS 
 -- ─────────────────────────────────────────────────
 -- `Σ A P` is a dependent pair. 
 -- It stores `x : A` together with a proof of `P x`.
@@ -245,9 +245,6 @@ Even (suc (suc n)) = Even n
 -- EXERCISE: give an even natural number together with evidence.
 there-exists-an-even : Σ ℕ Even
 there-exists-an-even  = 2 ,, tt
-
-
-
 
 
 -- ─────────────────────────────────────────────────
